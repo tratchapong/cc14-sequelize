@@ -1,0 +1,21 @@
+use env variable with sequelize
+
+in .env
+
+DB_URL=mysql://root:Codecamp2021@localhost:3306/cc14_todolist
+
+-----
+in config.json
+
+  "development": {
+    "use_env_variable": "DB_URL"
+  },
+
+-----
+
+.sequelizerc & dbSync.js
+
+require('dotenv').config()
+
+-----
+

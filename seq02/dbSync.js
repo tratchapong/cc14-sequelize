@@ -1,3 +1,4 @@
+require('dotenv').config()
 const {sequelize, User, Todo} = require('./models')
 
 sequelize
