@@ -9,9 +9,6 @@ module.exports = (sequelize, DataTypes) => {
               isAlpha: true,
               len: [2, 15],
             },
-            get() {
-              return this.getDataValue('name').toUpperCase();
-            }
           },
           password: {
             type: DataTypes.STRING,
