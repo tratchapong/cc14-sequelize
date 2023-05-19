@@ -40,7 +40,7 @@ exports.login = (req, res, next) => {
             id: user.id,
             name: user.name
         }
-        const token = jwt.sign(payload, process.env.JWT_SECRETKEY, {expiresIn: '30d'})
+        const token = jwt.sign(payload, `${process.env.JWT_SECRETKEY}`, {expiresIn: '30d'})
         res.json({token : token})
     }).catch(next)
 };

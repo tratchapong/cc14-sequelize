@@ -4,7 +4,7 @@ exports.getAllTodos = (req, res, next) => {
     console.log(req.user)
     const {id} = req.user
     Todo.findAll({
-        where: {userId : id}
+        // where: {userId : id}
     }).then(rs => {
         res.json(rs)
     }).catch(next)
@@ -100,16 +100,53 @@ exports.doubleDelete = async (req, res, next) => {
     const t = await sequelize.transaction()
 
     try {
-        let rs1 = await Todo.destroy({where: {id: id1}}, {transaction : t})
+        let rs1 = await Todo.destroy({
+            where: {id: id1},
+            transaction : t
+        })
             if (rs1===0)
-                throw new Error('Cannot delete')
-        await Todo.destroy({where: {id: id2}}, {transaction : t})
-
+                throw new Error('Cannot delete 1st id')
+        let rs2 = await Todo.destroy({
+            where: {id: id2} ,
+            transaction : t
+        })
+            if (rs2===0)
+                throw new Error('Cannot delete 2nd id')
         await t.commit()
-
         res.json({msg: `delete id: ${id1}, ${id2}`})
     }catch(err) {
         await t.rollback()
+        console.log('rollBack...')
         next(err)
-    }
+    } 
+}   
+
+exports.doubleDelete2 = (req, res, next) => {
+    const {id1, id2} = req.params
+    let tsc
+    sequelize.transaction().then( t => {
+        tsc = t
+        return Todo.destroy({
+            where: { id: id1 },
+            transaction: tsc
+        })
+    }).then( rs=> {
+        if (rs===0)
+            throw new Error('cannot delete 1st id')
+        return Todo.destroy({
+            where: {id: id2},
+            transaction: tsc
+        })
+    }).then( rs=> {
+        if(rs === 0)
+            throw new Error('cannot delete 2nd id')
+        return tsc.commit()
+    }).then( ()=> {
+        res.json({msg: `delete id: ${id1}, ${id2}` })
+    }).catch(err => {
+        tsc.rollback().then( ()=> {
+            console.log('rollBack...')
+            next(err)
+        })
+    })
 }
