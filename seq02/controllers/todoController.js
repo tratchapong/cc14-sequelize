@@ -1,7 +1,11 @@
-const {Todo, User} = require('../models')
+const {Todo, User, sequelize} = require('../models')
 
 exports.getAllTodos = (req, res, next) => {
-    Todo.findAll().then(rs => {
+    console.log(req.user)
+    const {id} = req.user
+    Todo.findAll({
+        where: {userId : id}
+    }).then(rs => {
         res.json(rs)
     }).catch(next)
 }
@@ -65,5 +69,47 @@ exports.updateTodo = (req, res, next) => {
 
 exports.getTodoByUser = (req, res, next) => {
     const {name} = req.query
+    User.findAll({
+        attributes: {exclude: 'password'},
+        where : { name : name},
+        include : {
+            model : Todo,
+            attributes: ['title', 'dueDate', 'status', 'remainDay']
+        }
+    }).then(rs => {
+        res.json(rs)
+    }).catch(next)
 }
 
+exports.summaryTodo = (req, res, next) => {
+    User.findAll({
+        attributes: ['name', 'password'],
+        include: {
+            model : Todo,
+            attributes: [ [sequelize.fn('count', sequelize.col('title')), 'tasks' ]],
+        },
+        group: 'user_id' 
+    }).then(rs => {
+        res.json(rs)
+    }).catch(next)
+}
+
+exports.doubleDelete = async (req, res, next) => {
+    const  {id1, id2} = req.params
+
+    const t = await sequelize.transaction()
+
+    try {
+        let rs1 = await Todo.destroy({where: {id: id1}}, {transaction : t})
+            if (rs1===0)
+                throw new Error('Cannot delete')
+        await Todo.destroy({where: {id: id2}}, {transaction : t})
+
+        await t.commit()
+
+        res.json({msg: `delete id: ${id1}, ${id2}`})
+    }catch(err) {
+        await t.rollback()
+        next(err)
+    }
+}

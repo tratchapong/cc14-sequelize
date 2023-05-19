@@ -10,12 +10,12 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DATEONLY,
             allowNull: false,
           },
-          nextSevenDay: {
+          remainDay: {
             type: DataTypes.VIRTUAL,
             get() {
-              let sevenDay = new Date(this.dueDate);
-              sevenDay.setDate(sevenDay.getDate()+7);
-              return sevenDay
+              let diff = new Date(this.dueDate).getTime() - new Date()
+              let n_days = Math.ceil(diff / (1000 * 3600 * 24));
+              return n_days
             }
           },
           status: {
