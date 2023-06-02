@@ -83,7 +83,7 @@ exports.getTodoByUser = (req, res, next) => {
 
 exports.summaryTodo = (req, res, next) => {
     User.findAll({
-        attributes: ['name', 'password'],
+        attributes: ['name'],
         include: {
             model : Todo,
             attributes: [ [sequelize.fn('count', sequelize.col('title')), 'tasks' ]],

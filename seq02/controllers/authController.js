@@ -44,3 +44,9 @@ exports.login = (req, res, next) => {
         res.json({token : token})
     }).catch(next)
 };
+
+exports.getMe = (req,res,next) => {
+  const {id, name, image} = req.user
+  console.log({id, name, image})
+  res.json({id, name, image})
+}
